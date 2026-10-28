@@ -1,0 +1,288 @@
+# Сборка OpenWrt 19.07.10 + WireGuard для TP-Link TL-WR840N v6 / v6.2 (v6.20).
+# Запускается сама при изменениях в ветке main, а также вручную:
+# Actions → «TL-WR840N v6 + WireGuard» → Run workflow (галочки LuCI и PPPoE).
+# Готовые прошивки — в ветке firmware этого репозитория и в разделе Artifacts у запуска.
+name: TL-WR840N v6 + WireGuard
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md"]
+  workflow_dispatch:
+    inputs:
+      luci:
+        description: "Веб-интерфейс LuCI (места впритык)"
+        type: boolean
+        default: false
+      pppoe:
+        description: "PPPoE — интернет по логину и паролю"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: firmware-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ubuntu:20.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        shell: bash
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      FORCE_UNSAFE_CONFIGURE: "1"
+      LUCI: ${{ inputs.luci && '1' || '0' }}
+      PPPOE: ${{ inputs.pppoe && '1' || '0' }}
+    steps:
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            build-essential ca-certificates file gawk gettext git libncurses5-dev \
+            libssl-dev python2 python3 python3-distutils rsync unzip wget xsltproc \
+            zlib1g-dev flex bison bzip2 patch time
+
+      - name: Build firmware
+        id: build
+        run: |
+          cat > build.sh <<'BUILD_SH'
+          #!/usr/bin/env bash
+          # Сборка OpenWrt 19.07.10 + WireGuard для TP-Link TL-WR840N v6 / v6.1 / v6.2 (v6.20).
+          #
+          # Официальной поддержки v6 в OpenWrt нет. Основа — неофициальный форк
+          # IcedShake/openwrt-19.07-tl-wr840n-v6.x, зафиксированный по коммиту.
+          # Собираются сразу обе ревизии: Ver 6.0/6.1 и Ver 6.2/6.20.
+          #
+          # Нужна Ubuntu 20.04 или 22.04 (в 24.04 нет python2 — собирайте в Docker, см. README).
+          # В WSL запускать в домашней папке Linux, не в /mnt/c. Не от root.
+          #
+          #   ./build.sh                 # WireGuard без веб-интерфейса (рекомендуется)
+          #   LUCI=1 ./build.sh          # + веб-интерфейс LuCI (места впритык)
+          #   PPPOE=1 ./build.sh         # + PPPoE (интернет по логину/паролю)
+          #   ONLY_CONFIG=1 ./build.sh   # только проверить конфиг, без сборки
+          set -euo pipefail
+          shopt -s nullglob
+
+          LUCI="${LUCI:-0}"
+          PPPOE="${PPPOE:-0}"
+          ONLY_CONFIG="${ONLY_CONFIG:-0}"
+          JOBS="${JOBS:-$(nproc)}"
+          BASE_DIR="$(pwd)"
+          WORKDIR="${WORKDIR:-$BASE_DIR/openwrt}"
+          OUTDIR="${OUTDIR:-$BASE_DIR/firmware}"
+
+          FORK_URL="https://github.com/IcedShake/openwrt-19.07-tl-wr840n-v6.x.git"
+          FORK_COMMIT="4ea81ade927201ecf16d7a8fe99a2a8650e7d590"      # тег v19.07.10
+          PACKAGES_URL="https://github.com/openwrt/packages.git"
+          PACKAGES_COMMIT="1c5e4c80f49bfddaee1998636fd8efe915fee7fc"  # как в feeds.conf.default форка
+          LUCI_URL="https://github.com/openwrt/luci.git"
+          LUCI_COMMIT="786ebc9c014efed4df0d67b140b2348a58d99f5b"
+
+          # sysupgrade больше 3,5 МБ не оставляет на 4 МБ флеше места под настройки (jffs2)
+          SIZE_LIMIT=3670016
+
+          log() { printf '\n==> %s\n' "$*"; }
+          die() { printf '\nОШИБКА: %s\n' "$*" >&2; exit 1; }
+
+          # Скачать репозиторий ровно на нужном коммите (без истории)
+          fetch_commit() {
+          	local url=$1 commit=$2 dir=$3
+          	if [ -d "$dir/.git" ] && [ "$(git -C "$dir" rev-parse HEAD 2>/dev/null)" = "$commit" ]; then
+          		return 0
+          	fi
+          	rm -rf "$dir"
+          	mkdir -p "$dir"
+          	git -C "$dir" init -q
+          	git -C "$dir" remote add origin "$url"
+          	git -C "$dir" fetch -q --depth 1 origin "$commit"
+          	git -C "$dir" -c advice.detachedHead=false checkout -q FETCH_HEAD
+          	[ "$(git -C "$dir" rev-parse HEAD)" = "$commit" ] || die "в $url не тот коммит"
+          }
+
+          need_y() { grep -qxF "CONFIG_$1=y" .config || die "в конфиге не включилось: $1"; }
+          need_off() { if grep -qxF "CONFIG_$1=y" .config; then die "в конфиге осталось лишнее: $1"; fi; }
+
+          # --- проверки окружения ---
+          if [ "$(id -u)" = 0 ] && [ -z "${FORCE_UNSAFE_CONFIGURE:-}" ]; then
+          	die "не запускайте от root (в Docker/CI задайте FORCE_UNSAFE_CONFIGURE=1)"
+          fi
+          case "$WORKDIR" in
+          	/mnt/[a-z]/*) die "в WSL собирайте в домашней папке Linux (cd ~), не в /mnt/..." ;;
+          esac
+          command -v python2 >/dev/null || command -v python2.7 >/dev/null ||
+          	die "нужен python2: на Ubuntu 20.04/22.04 — sudo apt install python2; на 24.04 — сборка в Docker (см. README)"
+
+          # --- исходники ---
+          log "Исходники OpenWrt 19.07.10 (форк с поддержкой v6)"
+          fetch_commit "$FORK_URL" "$FORK_COMMIT" "$WORKDIR"
+          cd "$WORKDIR"
+
+          log "Фиды packages и luci"
+          fetch_commit "$PACKAGES_URL" "$PACKAGES_COMMIT" "$WORKDIR/.feeds-src/packages"
+          fetch_commit "$LUCI_URL" "$LUCI_COMMIT" "$WORKDIR/.feeds-src/luci"
+          cat > feeds.conf <<EOF
+          src-link packages $WORKDIR/.feeds-src/packages
+          src-link luci $WORKDIR/.feeds-src/luci
+          EOF
+          ./scripts/feeds update -a
+          ./scripts/feeds install luci-base luci-mod-admin-full luci-theme-bootstrap \
+          	luci-proto-wireguard luci-proto-ppp libiwinfo-lua
+
+          # Форк по умолчанию включает ОТКРЫТЫЙ Wi-Fi "OpenWrt" без пароля — убираем.
+          # Wi-Fi останется выключенным, пока не настроите его (wg-setup.sh).
+          rm -f target/linux/ramips/base-files/etc/uci-defaults/99_wireless_config
+
+          # --- конфиг: минимум под 4 МБ + WireGuard ---
+          log "Конфигурация (LuCI=$LUCI, PPPoE=$PPPOE)"
+          cat > .config <<'EOF'
+          CONFIG_TARGET_ramips=y
+          CONFIG_TARGET_ramips_mt76x8=y
+          CONFIG_TARGET_MULTI_PROFILE=y
+          CONFIG_TARGET_DEVICE_ramips_mt76x8_DEVICE_tl-wr840n-v6=y
+          CONFIG_TARGET_DEVICE_ramips_mt76x8_DEVICE_tl-wr840n-v6.2=y
+          # CONFIG_TARGET_PER_DEVICE_ROOTFS is not set
+          CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=512
+          CONFIG_KERNEL_SQUASHFS_FRAGMENT_CACHE_SIZE=1
+          CONFIG_KERNEL_CC_OPTIMIZE_FOR_SIZE=y
+          # CONFIG_KERNEL_CC_OPTIMIZE_FOR_PERFORMANCE is not set
+          # CONFIG_KERNEL_DEBUG_INFO is not set
+          # CONFIG_KERNEL_DEBUG_KERNEL is not set
+          # CONFIG_KERNEL_KALLSYMS is not set
+          # CONFIG_KERNEL_DEBUG_FS is not set
+          # CONFIG_KERNEL_CRASHLOG is not set
+          # CONFIG_KERNEL_SWAP is not set
+          # CONFIG_KERNEL_MAGIC_SYSRQ is not set
+          # CONFIG_KERNEL_ELF_CORE is not set
+          # CONFIG_KERNEL_COREDUMP is not set
+          # CONFIG_KERNEL_IPV6 is not set
+          # CONFIG_IPV6 is not set
+          # CONFIG_COLLECT_KERNEL_DEBUG is not set
+          # CONFIG_SIGNED_PACKAGES is not set
+          CONFIG_CLEAN_IPKG=y
+          CONFIG_STRIP_KERNEL_EXPORTS=y
+          CONFIG_USE_MKLIBS=y
+          # CONFIG_PACKAGE_opkg is not set
+          # CONFIG_PACKAGE_odhcp6c is not set
+          # CONFIG_PACKAGE_odhcpd-ipv6only is not set
+          # CONFIG_PACKAGE_ip6tables is not set
+          # CONFIG_PACKAGE_wpad-basic is not set
+          CONFIG_PACKAGE_wpad-mini=y
+          # CONFIG_PACKAGE_MAC80211_DEBUGFS is not set
+          # CONFIG_PACKAGE_MAC80211_MESH is not set
+          CONFIG_PACKAGE_kmod-wireguard=y
+          CONFIG_PACKAGE_wireguard-tools=y
+          EOF
+          if [ "$PPPOE" = 1 ]; then
+          	printf '%s\n' CONFIG_PACKAGE_ppp=y CONFIG_PACKAGE_ppp-mod-pppoe=y >> .config
+          else
+          	printf '%s\n' '# CONFIG_PACKAGE_ppp is not set' '# CONFIG_PACKAGE_ppp-mod-pppoe is not set' >> .config
+          fi
+          if [ "$LUCI" = 1 ]; then
+          	cat >> .config <<'EOF'
+          CONFIG_PACKAGE_uhttpd=y
+          CONFIG_PACKAGE_luci-base=y
+          CONFIG_LUCI_SRCDIET=y
+          CONFIG_PACKAGE_luci-mod-admin-full=y
+          CONFIG_PACKAGE_luci-theme-bootstrap=y
+          CONFIG_PACKAGE_libiwinfo-lua=y
+          CONFIG_PACKAGE_luci-proto-wireguard=y
+          EOF
+          	if [ "$PPPOE" = 1 ]; then echo CONFIG_PACKAGE_luci-proto-ppp=y >> .config; fi
+          fi
+          make defconfig
+
+          for s in TARGET_MULTI_PROFILE \
+          	TARGET_DEVICE_ramips_mt76x8_DEVICE_tl-wr840n-v6 \
+          	TARGET_DEVICE_ramips_mt76x8_DEVICE_tl-wr840n-v6.2 \
+          	PACKAGE_kmod-wireguard PACKAGE_wireguard-tools PACKAGE_wpad-mini; do
+          	need_y "$s"
+          done
+          for s in PACKAGE_opkg PACKAGE_wpad-basic PACKAGE_odhcp6c KERNEL_IPV6 TARGET_PER_DEVICE_ROOTFS \
+          	PACKAGE_MAC80211_DEBUGFS PACKAGE_MAC80211_MESH; do
+          	need_off "$s"
+          done
+          if [ "$PPPOE" = 1 ]; then need_y PACKAGE_ppp-mod-pppoe; else need_off PACKAGE_ppp; fi
+          if [ "$LUCI" = 1 ]; then need_y PACKAGE_luci-base; need_y PACKAGE_luci-proto-wireguard; else need_off PACKAGE_luci-base; fi
+          log "Конфиг в порядке"
+          if [ "$ONLY_CONFIG" = 1 ]; then exit 0; fi
+
+          # --- сборка ---
+          log "Скачивание исходников пакетов"
+          make -j"$JOBS" download || make -j1 download V=s
+
+          log "Сборка (тулчейн + ядро + пакеты, обычно 1–2 часа)"
+          make -j"$JOBS" || make -j1 V=s
+
+          # --- результат ---
+          log "Готовые файлы"
+          BIN="$WORKDIR/bin/targets/ramips/mt76x8"
+          rm -rf "$OUTDIR"
+          mkdir -p "$OUTDIR"
+          oversize=0
+          for dev in v6 v6.2; do
+          	case "$dev" in
+          		v6) sub="Ver_6.0_6.1" ;;
+          		*) sub="Ver_6.2_6.20" ;;
+          	esac
+          	ups=("$BIN"/*-tl-wr840n-"$dev"-squashfs-sysupgrade.bin)
+          	recs=("$BIN"/*-tl-wr840n-"$dev"-squashfs-tftp-recovery.bin)
+          	if [ "${#ups[@]}" != 1 ] || [ "${#recs[@]}" != 1 ]; then
+          		die "не найден образ для $dev (смотрите лог сборки выше)"
+          	fi
+          	mkdir -p "$OUTDIR/$sub"
+          	cp "${ups[0]}" "$OUTDIR/$sub/sysupgrade.bin"
+          	cp "${recs[0]}" "$OUTDIR/$sub/tp_recovery.bin"
+          	size=$(stat -c %s "${ups[0]}")
+          	echo "$sub: sysupgrade.bin = $size байт (предел $SIZE_LIMIT)"
+          	if [ "$size" -gt "$SIZE_LIMIT" ]; then oversize=1; fi
+          done
+          cp "$BIN"/*.manifest "$OUTDIR/" 2>/dev/null || true
+          (cd "$OUTDIR" && sha256sum ./*/*.bin > SHA256SUMS)
+          cat > "$OUTDIR/build-info.txt" <<EOF
+          OpenWrt 19.07.10, форк IcedShake (коммит $FORK_COMMIT)
+          WireGuard: да | LuCI: $LUCI | PPPoE: $PPPOE | IPv6: нет
+          Собрано: $(date -u '+%Y-%m-%d %H:%M UTC')
+          Ver_6.0_6.1  — для наклейки Ver 6.0 / 6.1 (сборка не проверена сообществом)
+          Ver_6.2_6.20 — для наклейки Ver 6.2 / 6.20
+          tp_recovery.bin — для первой прошивки по TFTP, sysupgrade.bin — для обновления из-под OpenWrt
+          EOF
+
+          if [ "$oversize" = 1 ]; then
+          	printf '\nВНИМАНИЕ: образ больше 3,5 МБ — настройки не будут сохраняться после перезагрузки.\nСоберите без LuCI (LUCI=0) или без PPPoE. Такие файлы НЕ прошивать.\n' >&2
+          	exit 3
+          fi
+          log "Готово: $OUTDIR"
+          BUILD_SH
+          bash build.sh 2>&1 | tee build.log
+
+      - name: Upload firmware
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tl-wr840n-v6-wireguard
+          path: firmware/
+          if-no-files-found: warn
+
+      - name: Publish to branch firmware
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS: ${{ steps.build.outcome }}
+        run: |
+          mkdir -p firmware
+          echo "$STATUS run=$GITHUB_RUN_ID sha=$GITHUB_SHA luci=$LUCI pppoe=$PPPOE" > firmware/status.txt
+          if [ -f build.log ]; then tail -n 300 build.log > firmware/build-log-tail.txt; fi
+          git config --global --add safe.directory '*'
+          cd firmware
+          git init -q
+          git checkout -q -b firmware
+          git add -A
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com \
+            commit -q -m "Build $GITHUB_RUN_ID: $STATUS"
+          git push -q -f "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:refs/heads/firmware
