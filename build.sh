@@ -8,15 +8,15 @@
 # Нужна Ubuntu 20.04 или 22.04 (в 24.04 нет python2 — собирайте в Docker, см. README).
 # В WSL запускать в домашней папке Linux, не в /mnt/c. Не от root.
 #
-#   ./build.sh                 # WireGuard без веб-интерфейса (рекомендуется)
+#   ./build.sh                 # WireGuard + PPPoE + qrencode, без веб-интерфейса
 #   LUCI=1 ./build.sh          # + веб-интерфейс LuCI (места впритык)
-#   PPPOE=1 ./build.sh         # + PPPoE (интернет по логину/паролю)
+#   PPPOE=0 ./build.sh         # без PPPoE
 #   ONLY_CONFIG=1 ./build.sh   # только проверить конфиг, без сборки
 set -euo pipefail
 shopt -s nullglob
 
 LUCI="${LUCI:-0}"
-PPPOE="${PPPOE:-0}"
+PPPOE="${PPPOE:-1}"
 ONLY_CONFIG="${ONLY_CONFIG:-0}"
 JOBS="${JOBS:-$(nproc)}"
 BASE_DIR="$(pwd)"
@@ -78,7 +78,7 @@ src-link luci $WORKDIR/.feeds-src/luci
 EOF
 ./scripts/feeds update -a
 ./scripts/feeds install luci-base luci-mod-admin-full luci-theme-bootstrap \
-	luci-proto-wireguard luci-proto-ppp libiwinfo-lua
+	luci-proto-wireguard luci-proto-ppp libiwinfo-lua qrencode
 
 # Форк по умолчанию включает ОТКРЫТЫЙ Wi-Fi "OpenWrt" без пароля — убираем.
 # Wi-Fi останется выключенным, пока не настроите его (wg-setup.sh).
@@ -123,6 +123,7 @@ CONFIG_PACKAGE_wpad-mini=y
 # CONFIG_PACKAGE_MAC80211_MESH is not set
 CONFIG_PACKAGE_kmod-wireguard=y
 CONFIG_PACKAGE_wireguard-tools=y
+CONFIG_PACKAGE_qrencode=y
 EOF
 if [ "$PPPOE" = 1 ]; then
 	printf '%s\n' CONFIG_PACKAGE_ppp=y CONFIG_PACKAGE_ppp-mod-pppoe=y >> .config
@@ -146,7 +147,7 @@ make defconfig
 for s in TARGET_MULTI_PROFILE \
 	TARGET_DEVICE_ramips_mt76x8_DEVICE_tl-wr840n-v6 \
 	TARGET_DEVICE_ramips_mt76x8_DEVICE_tl-wr840n-v6.2 \
-	PACKAGE_kmod-wireguard PACKAGE_wireguard-tools PACKAGE_wpad-mini; do
+	PACKAGE_kmod-wireguard PACKAGE_wireguard-tools PACKAGE_wpad-mini PACKAGE_qrencode; do
 	need_y "$s"
 done
 for s in PACKAGE_opkg PACKAGE_wpad-basic PACKAGE_odhcp6c KERNEL_IPV6 TARGET_PER_DEVICE_ROOTFS \
