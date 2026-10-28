@@ -1,0 +1,1 @@
+success run=40656003038 sha=4277cd3cc432d896a32f047ea74e12e983fec9a3 luci=0 pppoe=1

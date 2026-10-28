@@ -1,0 +1,300 @@
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libssh2', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/boot/kexec-tools/Makefile' has a dependency on 'liblzma', which does not exist
+WARNING: Makefile 'package/network/services/lldpd/Makefile' has a dependency on 'libnetsnmp', which does not exist
+WARNING: Makefile 'package/network/utils/nftables/Makefile' has a dependency on 'jansson', which does not exist
+#
+# configuration written to .config
+#
+
+==> Конфиг в порядке
+
+==> Скачивание исходников пакетов
+WARNING: Makefile 'package/utils/busybox/Makefile' has a dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/utils/busybox/Makefile' has a build dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libgnutls', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libopenldap', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libidn2', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libssh2', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/boot/kexec-tools/Makefile' has a dependency on 'liblzma', which does not exist
+WARNING: Makefile 'package/network/services/lldpd/Makefile' has a dependency on 'libnetsnmp', which does not exist
+WARNING: Makefile 'package/network/utils/nftables/Makefile' has a dependency on 'jansson', which does not exist
+WARNING: Makefile 'package/utils/busybox/Makefile' has a dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/utils/busybox/Makefile' has a build dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libgnutls', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libopenldap', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libidn2', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libssh2', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/boot/kexec-tools/Makefile' has a dependency on 'liblzma', which does not exist
+WARNING: Makefile 'package/network/services/lldpd/Makefile' has a dependency on 'libnetsnmp', which does not exist
+WARNING: Makefile 'package/network/utils/nftables/Makefile' has a dependency on 'jansson', which does not exist
+time: target/linux/prereq#0.08#0.05#0.13
+ make[1] tools/flock/compile
+ make[2] -C tools/flock compile
+ make[1] tools/download
+ make[2] -C tools/gmp download
+ make[2] -C tools/mpfr download
+ make[2] -C tools/mpc download
+ make[2] -C tools/libelf download
+ make[2] -C tools/expat download
+ make[2] -C tools/m4 download
+ make[2] -C tools/libtool download
+ make[2] -C tools/autoconf download
+ make[2] -C tools/automake download
+ make[2] -C tools/flex download
+ make[2] -C tools/bison download
+ make[2] -C tools/pkg-config download
+ make[2] -C tools/mklibs download
+ make[2] -C tools/zlib download
+ make[2] -C tools/sstrip download
+ make[2] -C tools/make-ext4fs download
+ make[2] -C tools/e2fsprogs download
+ make[2] -C tools/mtd-utils download
+ make[2] -C tools/mkimage download
+ make[2] -C tools/firmware-utils download
+ make[2] -C tools/patch-image download
+ make[2] -C tools/quilt download
+ make[2] -C tools/padjffs2 download
+ make[2] -C tools/mm-macros download
+ make[2] -C tools/missing-macros download
+ make[2] -C tools/cmake download
+ make[2] -C tools/scons download
+ make[2] -C tools/bc download
+ make[2] -C tools/findutils download
+ make[2] -C tools/gengetopt download
+ make[2] -C tools/patchelf download
+ make[2] -C tools/mtools download
+ make[2] -C tools/dosfstools download
+ make[2] -C tools/libressl download
+ make[2] -C tools/lzma download
+ make[2] -C tools/squashfskit4 download
+ make[2] -C tools/zip download
+ make[2] -C tools/tar download
+ make[2] -C tools/xz download
+ make[2] -C tools/patch download
+ make[2] -C tools/flock download
+ make[2] -C tools/sed download
+ make[1] toolchain/download
+ make[2] -C toolchain/gdb download
+ make[2] -C toolchain/kernel-headers download
+ make[2] -C toolchain/binutils download
+ make[2] -C toolchain/gcc/initial download
+ make[2] -C toolchain/gcc/final download
+ make[2] -C toolchain/musl download
+ make[2] -C toolchain/fortify-headers download
+ make[1] package/download
+ make[2] -C .feeds-src/packages/libs/qrencode download
+ make[2] -C package/firmware/wireless-regdb download
+ make[2] -C package/base-files download
+ make[2] -C package/kernel/gpio-button-hotplug download
+ make[2] -C package/kernel/linux download
+ make[2] -C package/kernel/mac80211 download
+ make[2] -C package/kernel/mt76 download
+ make[2] -C package/libs/libjson-c download
+ make[2] -C package/libs/libmnl download
+ make[2] -C package/libs/libnl-tiny download
+ make[2] -C package/libs/libubox download
+ make[2] -C package/libs/toolchain download
+ make[2] -C package/libs/uclient download
+ make[2] -C package/network/config/firewall download
+ make[2] -C package/network/config/netifd download
+ make[2] -C package/network/config/swconfig download
+ make[2] -C package/network/services/dnsmasq download
+ make[2] -C package/network/services/dropbear download
+ make[2] -C package/network/services/hostapd download
+ make[2] -C package/network/services/ppp download
+ make[2] -C package/network/services/wireguard download
+ make[2] -C package/network/utils/iproute2 download
+ make[2] -C package/network/utils/iptables download
+ make[2] -C package/network/utils/iw download
+ make[2] -C package/network/utils/iwinfo download
+ make[2] -C package/network/utils/wireguard-tools download
+ make[2] -C package/system/fstools download
+ make[2] -C package/system/fwtool download
+ make[2] -C package/system/mtd download
+ make[2] -C package/system/procd download
+ make[2] -C package/system/ubox download
+ make[2] -C package/system/ubus download
+ make[2] -C package/system/uci download
+ make[2] -C package/system/urandom-seed download
+ make[2] -C package/system/urngd download
+ make[2] -C package/utils/busybox download
+ make[2] -C package/utils/jsonfilter download
+ make[1] target/download
+ make[2] -C target/linux download
+
+==> Сборка (тулчейн + ядро + пакеты, обычно 1–2 часа)
+WARNING: Makefile 'package/utils/busybox/Makefile' has a dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/utils/busybox/Makefile' has a build dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libgnutls', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libopenldap', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libidn2', which does not exist
+WARNING: Makefile 'package/network/utils/curl/Makefile' has a dependency on 'libssh2', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/network/utils/iproute2/Makefile' has a dependency on 'libcap', which does not exist
+WARNING: Makefile 'package/boot/kexec-tools/Makefile' has a dependency on 'liblzma', which does not exist
+WARNING: Makefile 'package/network/services/lldpd/Makefile' has a dependency on 'libnetsnmp', which does not exist
+WARNING: Makefile 'package/network/utils/nftables/Makefile' has a dependency on 'jansson', which does not exist
+ make[1] world
+ make[2] tools/compile
+ make[2] package/cleanup
+ make[3] -C tools/flock compile
+ make[3] -C tools/xz compile
+ make[3] -C tools/sed compile
+ make[3] -C tools/patch compile
+ make[3] -C tools/tar compile
+ make[3] -C tools/pkg-config compile
+ make[3] -C tools/expat compile
+ make[3] -C tools/m4 compile
+ make[3] -C tools/sstrip compile
+ make[3] -C tools/patch-image compile
+ make[3] -C tools/scons compile
+ make[3] -C tools/mtools compile
+ make[3] -C tools/lzma compile
+ make[3] -C tools/zip compile
+ make[3] -C tools/libressl compile
+ make[3] -C tools/autoconf compile
+ make[3] -C tools/automake compile
+ make[3] -C tools/missing-macros compile
+ make[3] -C tools/libtool compile
+ make[3] -C tools/dosfstools compile
+ make[3] -C tools/cmake compile
+ make[3] -C tools/mkimage compile
+ make[3] -C tools/gmp compile
+ make[3] -C tools/libelf compile
+ make[3] -C tools/flex compile
+ make[3] -C tools/mklibs compile
+ make[3] -C tools/e2fsprogs compile
+ make[3] -C tools/mm-macros compile
+ make[3] -C tools/gengetopt compile
+ make[3] -C tools/patchelf compile
+ make[3] -C tools/mpfr compile
+ make[3] -C tools/bison compile
+ make[3] -C tools/mpc compile
+ make[3] -C tools/findutils compile
+ make[3] -C tools/bc compile
+ make[3] -C tools/quilt compile
+ make[3] -C tools/padjffs2 compile
+ make[3] -C tools/zlib compile
+ make[3] -C tools/mtd-utils compile
+ make[3] -C tools/make-ext4fs compile
+ make[3] -C tools/firmware-utils compile
+ make[3] -C tools/squashfskit4 compile
+ make[2] toolchain/compile
+ make[3] -C toolchain/binutils compile
+ make[3] -C toolchain/gdb compile
+ make[3] -C toolchain/fortify-headers compile
+ make[3] -C toolchain/gcc/initial compile
+ make[3] -C toolchain/kernel-headers compile
+ make[3] -C toolchain/musl compile
+ make[3] -C toolchain/gcc/final compile
+ make[2] target/compile
+ make[3] -C target/linux compile
+ make[2] buildinfo
+ make[2] package/compile
+ make[3] diffconfig buildversion feedsversion
+ make[3] -C package/libs/ncurses host-compile
+ make[3] -C package/libs/libjson-c host-compile
+ make[3] -C package/libs/toolchain compile
+ make[3] -C package/system/fwtool host-compile
+ make[3] -C package/system/usign host-compile
+ make[3] -C .feeds-src/packages/libs/qrencode compile
+ make[3] -C package/firmware/wireless-regdb compile
+ make[3] -C package/kernel/gpio-button-hotplug compile
+ make[3] -C package/firmware/b43legacy-firmware compile
+ make[3] -C package/libs/openssl compile
+ make[3] -C package/libs/gettext compile
+ make[3] -C package/libs/libiconv compile
+ make[3] -C package/libs/libtool compile
+ make[3] -C package/libs/libmnl compile
+ make[3] -C package/libs/mbedtls compile
+ make[3] -C package/network/services/dropbear compile
+ make[3] -C package/libs/libpcap compile
+ make[3] -C package/network/utils/linux-atm compile
+ make[3] -C package/network/utils/resolveip compile
+ make[3] -C package/utils/bzip2 compile
+ make[3] -C package/libs/argp-standalone compile
+ make[3] -C package/utils/busybox compile
+ make[3] -C package/libs/libubox host-compile
+ make[3] -C package/libs/libnl-tiny compile
+ make[3] -C package/libs/libjson-c compile
+ make[3] -C package/utils/lua compile
+ make[3] -C package/firmware/linux-firmware compile
+ make[3] -C package/firmware/prism54-firmware compile
+ make[3] -C package/libs/zlib compile
+ make[3] -C package/system/fwtool compile
+ make[3] -C package/system/ucert host-compile
+ make[3] -C package/libs/wolfssl compile
+ make[3] -C package/network/utils/iw compile
+ make[3] -C package/system/opkg host-compile
+ make[3] -C package/libs/libubox compile
+ make[3] -C package/kernel/linux compile
+ make[3] -C package/libs/ncurses compile
+ make[3] -C package/utils/jsonfilter compile
+ make[3] -C package/libs/ustream-ssl compile
+ make[3] -C package/network/utils/iptables compile
+ make[3] -C package/network/services/ppp compile
+ make[3] -C package/libs/elfutils compile
+ make[3] -C package/system/mtd compile
+ make[3] -C package/system/urngd compile
+ make[3] -C package/system/ubus compile
+ make[3] -C package/system/uci compile
+ make[3] -C package/libs/uclient compile
+ make[3] -C package/network/services/dnsmasq compile
+ make[3] -C package/network/config/netifd compile
+ make[3] -C package/system/ubox compile
+ make[3] -C package/utils/util-linux compile
+ make[3] -C package/network/services/hostapd compile
+ make[3] -C package/network/config/firewall compile
+ make[3] -C package/network/config/swconfig compile
+ make[3] -C package/network/utils/iwinfo compile
+ make[3] -C package/system/urandom-seed compile
+ make[3] -C package/system/procd compile
+ make[3] -C package/kernel/mac80211 compile
+ make[3] -C package/network/utils/iproute2 compile
+ make[3] -C package/kernel/mt76 compile
+ make[3] -C package/network/utils/wireguard-tools compile
+ make[3] -C package/network/services/wireguard compile
+ make[3] -C package/system/fstools compile
+ make[3] -C package/base-files compile
+ make[2] package/install
+ make[2] target/install
+ make[3] -C target/linux install
+ make[2] package/index
+ make[2] json_overview_image_info
+ make[2] checksum
+
+==> Готовые файлы
+Ver_6.0_6.1: sysupgrade.bin = 3145989 байт (предел 3670016)
+Ver_6.2_6.20: sysupgrade.bin = 3145995 байт (предел 3670016)
+
+==> Готово: /__w/wr840n-build/wr840n-build/firmware
